@@ -1,4 +1,4 @@
-name: Android Builds (APK & AAB)
+name: Android Build (APK Only)
 
 on:
   push:
@@ -59,49 +59,5 @@ jobs:
       with:
         name: apk-build-artifact
         path: build/apk
-        if-no-files-found: warn
-        overwrite: false
-
-  build-aab:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-
-    - name: Install Python Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-
-    - name: Setup Flutter
-      uses: subosito/flutter-action@v2
-      with:
-        flutter-version: ${{ env.FLUTTER_VERSION }}
-
-    - name: Setup Java JDK
-      uses: actions/setup-java@v4.2.1
-      with:
-        distribution: 'temurin'
-        java-version: '21'
-
-    - name: Accept Android SDK licenses
-      run: yes | flutter doctor --android-licenses
-
-    - name: Flet Build AAB
-      run: |
-        flutter config --no-analytics
-        flet build aab --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
-
-    - name: Upload AAB Artifact
-      uses: actions/upload-artifact@v4.3.4
-      with:
-        name: aab-build-artifact
-        path: build/aab
         if-no-files-found: warn
         overwrite: false
