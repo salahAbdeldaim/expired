@@ -1,14 +1,6 @@
-name: Android Build (APK Only)
+name: Android Build (Debug APK)
 
 on:
-  push:
-    branches:
-      - master
-      - main
-  pull_request:
-    branches:
-      - master
-      - main
   workflow_dispatch:
 
 env:
@@ -34,6 +26,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install flet
 
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -41,23 +34,29 @@ jobs:
         flutter-version: ${{ env.FLUTTER_VERSION }}
 
     - name: Setup Java JDK
-      uses: actions/setup-java@v4.2.1
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '21'
+        java-version: '17'
 
     - name: Accept Android SDK licenses
       run: yes | flutter doctor --android-licenses
 
-    - name: Flet Build APK
+    - name: Install Android SDK components
+      run: sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+    - name: Flet Build Debug APK
       run: |
         flutter config --no-analytics
-        flet build apk --verbose --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
+        flet build apk --verbose --debug --build-number=$BUILD_NUMBER --build-version=$BUILD_VERSION
+
+    - name: List build outputs
+      run: ls -R build
 
     - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4.3.4
+      uses: actions/upload-artifact@v4
       with:
         name: apk-build-artifact
-        path: build/apk
+        path: build/flet/build/apk
         if-no-files-found: warn
         overwrite: false
